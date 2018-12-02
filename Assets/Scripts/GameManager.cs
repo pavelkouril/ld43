@@ -1,44 +1,41 @@
-﻿using System.Collections.Generic;
+﻿using System.Linq;
 using UnityEngine;
 
-public struct Passenger
-{
-    public int Id;
-    public string Name;
-    public int NetWorth;
-    public int Weight;
 
-    public Passenger(int id, string name, int netWorth, int weight)
-    {
-        Id = id;
-        Name = name;
-        NetWorth = netWorth;
-        Weight = weight;
-    }
-}
 
 public class GameManager : Singleton<GameManager>
 {
-    private List<Passenger> _passengers = new List<Passenger>();
+    public GameObject BalloonPrefab;
 
-    private void Start()
+    public Transform SpawnPoint;
+
+    public float MaxHeatUpTime;
+
+    public Balloon Balloon { get; set; }
+
+    private void Awake()
     {
-        _passengers.Add(new Passenger(1, "X", 120000000, 120));
-        _passengers.Add(new Passenger(2, "Y", 1000000, 80));
-        _passengers.Add(new Passenger(3, "Z", 1111111, 55));
-        _passengers.Add(new Passenger(4, "A", 1111111, 55));
-        _passengers.Add(new Passenger(5, "B", 1111111, 55));
-        _passengers.Add(new Passenger(6, "C", 1111111, 55));
+        var balloonGo = GameObject.Instantiate(BalloonPrefab, SpawnPoint.position, Quaternion.identity, SpawnPoint);
+        Balloon = balloonGo.GetComponent<Balloon>();
 
-        for (int i = 0; i < UiManager.Instance.PassengerPanels.Length; i++)
+        Balloon.Passengers.Add(new Passenger(1, "X", 120000000, 120));
+        Balloon.Passengers.Add(new Passenger(2, "Y", 1000000, 80));
+        Balloon.Passengers.Add(new Passenger(3, "Z", 1111111, 55));
+        Balloon.Passengers.Add(new Passenger(4, "A", 1111111, 55));
+        Balloon.Passengers.Add(new Passenger(5, "B", 1111111, 55));
+        Balloon.Passengers.Add(new Passenger(6, "C", 1111111, 55));
+
+        Balloon.HeatUpTimeLieft = MaxHeatUpTime;
+
+        for (int i = 0; i < Balloon.kMaxPassengers; i++)
         {
-            UiManager.Instance.PassengerPanels[i].Fill(_passengers[i]);
+            UiManager.Instance.PassengerPanels[i].Fill(Balloon.Passengers[i]);
         }
     }
 
     void Update()
     {
-
+        UiManager.Instance.UpdateStats(Balloon.transform.position.y, Balloon.Passengers.Count(x => x.Alive), Balloon.CalculateWeight(), Balloon.Passengers.Where(x => x.Alive).Sum(x => x.NetWorth), Balloon.Envelope.AirTemperatureInKelvins, Balloon.HeatUpTimeLieft);
     }
 
     public void HeatUp()

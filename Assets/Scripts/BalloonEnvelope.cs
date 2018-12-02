@@ -16,6 +16,8 @@ public class BalloonEnvelope : MonoBehaviour
     public float AirTemperatureInKelvins;
     public float HotAirVolume;
 
+    public Balloon Balloon { get; set; }
+
     private Rigidbody _rb;
 
     private void Awake()
